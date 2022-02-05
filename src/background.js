@@ -19,7 +19,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
 // ******
-connectFirestoreEmulator(db, 'localhost', 8080); 
+//connectFirestoreEmulator(db, 'localhost', 8080); 
 // ******
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
@@ -50,7 +50,11 @@ chrome.runtime.onMessage.addListener(
                 chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": ""}, function(response) {});
               });
             }
-          })
+          }) 
+          } else {
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+              chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": "unauthenticated"}, function(response) {});
+            });
         }
 
         sendResponse({value: true});
@@ -63,7 +67,7 @@ chrome.runtime.onMessage.addListener(
           setDoc(docRef, {data: request.data});
         }
 
-        chrome.runtime.sendMessage(true);
+        sendMessage(true);
         break;
 
       case "create":
@@ -71,6 +75,9 @@ chrome.runtime.onMessage.addListener(
         createUserWithEmailAndPassword(auth, request.email, request.password)
         .then(() => {
           chrome.runtime.sendMessage({reason: "useraction"});
+          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {"reason": "reload"}, function(response) {});
+          });
         })
         .catch((error) => {
           chrome.runtime.sendMessage({reason: "useraction", error: error.message});
@@ -83,6 +90,9 @@ chrome.runtime.onMessage.addListener(
         signInWithEmailAndPassword(auth, request.email, request.password)
         .then(() => {
           chrome.runtime.sendMessage({reason: "useraction"});
+          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {"reason": "reload"}, function(response) {});
+          });
         })
         .catch((error) => {
           chrome.runtime.sendMessage({reason: "useraction", error: error.message});
@@ -94,9 +104,12 @@ chrome.runtime.onMessage.addListener(
       case "logout":
         auth.signOut();
         chrome.runtime.sendMessage({reason: "useraction"});
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {"reason": "reload"}, function(response) {});
+        });
         break;
 
       default:
-        throw new Error("Unsupported action");
+        break;
     }
   });

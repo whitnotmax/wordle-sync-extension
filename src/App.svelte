@@ -5,7 +5,8 @@ import { onMount } from "svelte";
 	let user;
 	let state = "";
 	let errorNotification = "";
-
+	let syncText = "Save scores";
+	
 
 	async function getUser() {
 		console.log("get user");
@@ -56,6 +57,27 @@ import { onMount } from "svelte";
   		});
 	}
 
+	function handleSaveScoresClick() {
+		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {"reason": "needscores"}, function(response) {
+				if (chrome.runtime.lastError) {
+					console.warn(chrome.runtime.lastError);
+          			if (chrome.runtime.lastError.message === "Could not establish connection. Receiving end does not exist.") {
+          			  syncText = "This is not a Wordle game!";
+          			}
+          			else {
+          			  syncText = "Something happened, try again?";
+          			}
+        		} else {
+					syncText = "Syncing...";
+					setTimeout(() => {
+						syncText = "Sync scores";
+					}, 2500);
+				}
+			});
+        });
+	}
+
 
 </script>
 
@@ -76,7 +98,7 @@ import { onMount } from "svelte";
 		{/if}
 	{:else}
 	<p>{user.email}</p>
-
+	<button on:click={handleSaveScoresClick}>{syncText}</button>
 	<button on:click={logout}>Log out</button>
 	{/if}
 
