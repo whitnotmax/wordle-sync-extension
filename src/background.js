@@ -46,7 +46,9 @@ chrome.runtime.onMessage.addListener(
                 chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": docSnap.data().data}, function(response) {});
               });
             } else {
-              chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": ""}, function(response) {});
+              chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": ""}, function(response) {});
+              });
             }
           })
         }
