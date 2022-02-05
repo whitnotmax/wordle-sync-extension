@@ -1,7 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "Svelte-made Browser Extension",
-  "version": "1.0.0",
+  "name": "Wordle Sync",
   "permissions": ["storage", "tabs"],
   "background": {
     "scripts": ["build/background.js"],
@@ -16,5 +15,10 @@
       "matches": ["https://www.powerlanguage.co.uk/wordle/"],
       "js": ["build/injection.js"]
     }
-  ]
+  ],
+  "icons": { 
+    "16": "wordle16.png",
+    "48": "wordle48.png",
+   "128": "wordle128.png" },
+   "version": "1.0"
 }

@@ -97,7 +97,8 @@ import { onMount } from "svelte";
 		<button on:click={handleSignupClick}>Create account</button>
 		{/if}
 	{:else}
-	<p>{user.email}</p>
+	
+	<p class="logged-in-text">{user.email}</p>
 	<button on:click={handleSaveScoresClick}>{syncText}</button>
 	<button on:click={logout}>Log out</button>
 	{/if}
@@ -109,6 +110,10 @@ import { onMount } from "svelte";
 		min-height: 25em;
 	}
 	
+	:global(body) {
+		background-color: rgb(189, 189, 189);
+
+	}
 
 	:global(.centered) {
 		display: flex;
@@ -117,7 +122,20 @@ import { onMount } from "svelte";
 		justify-content: center;
 	}
 
+	:global(button) {
+		background-color: #538d4e;
+		border-radius: 3px;
+		color: rgb(238, 238, 238);
+		padding: 5px;
+		margin: 3px;
+	}
+
 	:global(.column) {
 		flex-direction: column;		
+	}
+
+	.logged-in-text {
+		font-size: 15px;
+		font-weight: bold;
 	}
 </style>
