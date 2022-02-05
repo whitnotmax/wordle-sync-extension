@@ -1,0 +1,101 @@
+<script>
+import { onMount } from "svelte";
+
+	import Form from "./Form.svelte";
+	let user;
+	let state = "";
+	let errorNotification = "";
+
+
+	async function getUser() {
+		console.log("get user");
+		chrome.runtime.sendMessage({reason: "user"}, function(response) {
+    		user = response.content;
+	});
+	}
+	onMount((async() => getUser()));
+	chrome.runtime.onMessage.addListener(
+		// on login, signup, logout
+		function(request, sender, sendResponse) {
+		if (request.reason === "useraction") {
+			if (!request?.error) {
+                window.location.reload();
+            } else {
+                errorNotification = request.error;
+            }
+		}
+	});
+
+	function handleRefresh() {
+		window.location.reload();
+	}
+
+	function handleLoginClick() {
+		state = "login";
+	}
+
+	function handleSignupClick() {
+		state = "signup";
+	}
+
+	function continueLogin(event) {
+		chrome.runtime.sendMessage({reason: "signin", email: event.detail.email, password: event.detail.password}, function(response) {
+    		//console.log(response?.error);
+  		});
+	}
+
+	function continueSignup(event) {
+		chrome.runtime.sendMessage({reason: "create", email: event.detail.email, password: event.detail.password}, function(response) {
+    		//console.log(response?.error);
+  		});
+	}
+
+	function logout() {
+		chrome.runtime.sendMessage({reason: "logout"}, function(response) {
+    		//console.log(response?.error);
+  		});
+	}
+
+
+</script>
+
+<svelte:body on:load={getUser}></svelte:body>
+<main class="centered column">
+	{#if !user}
+		{#if state === "signup"}
+		<Form action={"Create account"} on:continue={continueSignup}/>
+		<p>{errorNotification}</p>
+
+		{:else if state === "login"}
+		<Form action={"Login"} on:continue={continueLogin}/>
+		<p>{errorNotification}</p>
+
+		{:else}
+		<button on:click={handleLoginClick}>Login</button>
+		<button on:click={handleSignupClick}>Create account</button>
+		{/if}
+	{:else}
+	<p>{user.email}</p>
+
+	<button on:click={logout}>Log out</button>
+	{/if}
+
+</main>
+<style>
+	main {
+		min-width: 18em;
+		min-height: 25em;
+	}
+	
+
+	:global(.centered) {
+		display: flex;
+		
+		align-items: center;
+		justify-content: center;
+	}
+
+	:global(.column) {
+		flex-direction: column;		
+	}
+</style>
