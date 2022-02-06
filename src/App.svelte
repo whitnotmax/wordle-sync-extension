@@ -72,7 +72,7 @@ import { onMount } from "svelte";
 					syncText = "Syncing...";
 					setTimeout(() => {
 						syncText = "Sync scores";
-					}, 2500);
+					}, 800);
 				}
 			});
         });

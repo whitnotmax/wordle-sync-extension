@@ -35,28 +35,38 @@ chrome.runtime.onMessage.addListener(
         break;
 
       case "get":
-        if (auth.currentUser) {
-          console.log("get data");
-          const docRef = doc(db, "users", auth.currentUser.uid);
-          getDoc(docRef)
-          .then((docSnap) => {
-            if (docSnap.exists()) {
-              console.log("data is: " + docSnap.data().data);
-              chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": docSnap.data().data}, function(response) {});
-
-              });
+        console.log('get called');
+        chrome.alarms.create({ delayInMinutes: 0.00333333 }); // 0.2 seconds
+        function handleAlarm() { 
+          if (auth.currentUser) {
+            console.log("get data");
+            const docRef = doc(db, "users", auth.currentUser.uid);
+            getDoc(docRef)
+            .then((docSnap) => {
+              if (docSnap.exists()) {
+                console.log("data is: " + docSnap.data().data);
+                chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                  chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": docSnap.data().data}, function(response) {});
+  
+                });
+              } else {
+                chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                  chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": ""}, function(response) {});
+                });
+              }
+            }) 
             } else {
               chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": ""}, function(response) {});
+                chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": "unauthenticated"}, function(response) {});
               });
-            }
-          }) 
-          } else {
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-              chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": "unauthenticated"}, function(response) {});
-            });
+          }
+          // do this, otherwise a new listener gets added every time the page reloads and we send the data multiple times
+          chrome.alarms.onAlarm.removeListener(handleAlarm);
         }
+        chrome.alarms.onAlarm.addListener(handleAlarm);
+
+        
+
 
         sendResponse({value: true});
         break;
@@ -71,7 +81,7 @@ chrome.runtime.onMessage.addListener(
           });
         }
 
-        sendMessage(true);
+        sendResponse(true);
         break;
 
       case "create":
@@ -111,9 +121,11 @@ chrome.runtime.onMessage.addListener(
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
           chrome.tabs.sendMessage(tabs[0].id, {"reason": "reload"}, function(response) {});
         });
+        sendResponse(true);
         break;
 
       default:
+        sendResponse(true);
         break;
     }
   });
