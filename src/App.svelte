@@ -7,14 +7,21 @@ import { onMount } from "svelte";
 	let errorNotification = "";
 	let syncText = "Save scores";
 	
-
+	chrome.runtime.onMessage.addListener(
+  		function(request, sender, sendResponse) {
+			  console.log("request");
+			if (request.reason === "hasuser") {
+				console.log('User recieved');
+				console.log(request.user);
+				user = request.user;
+			}
+		});
 	async function getUser() {
 		console.log("get user");
 		chrome.runtime.sendMessage({reason: "user"}, function(response) {
-    		user = response.content;
 	});
 	}
-	onMount((async() => getUser()));
+	onMount((async() =>  getUser()));
 	chrome.runtime.onMessage.addListener(
 		// on login, signup, logout
 		function(request, sender, sendResponse) {
@@ -80,8 +87,8 @@ import { onMount } from "svelte";
 
 
 </script>
-
 <svelte:body on:load={getUser}></svelte:body>
+
 <main class="centered column">
 	{#if !user}
 		{#if state === "signup"}

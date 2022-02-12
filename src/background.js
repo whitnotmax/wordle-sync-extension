@@ -30,8 +30,15 @@ chrome.runtime.onMessage.addListener(
         break;
       
       case "user":
-        console.log(auth.currentUser)
-        sendResponse({content: auth.currentUser});
+        chrome.alarms.create({ delayInMinutes: 0.00166667 }); // 0.1 seconds
+        function handleUserAlarm() { 
+          console.log('handle alarm');
+          chrome.runtime.sendMessage({reason: "hasuser", "user": auth.currentUser}, function(response){});
+          // do this, otherwise a new listener gets added every time the page reloads and we send the data multiple times
+          chrome.alarms.onAlarm.removeListener(handleUserAlarm);
+        }
+        chrome.alarms.onAlarm.addListener(handleUserAlarm);
+        sendResponse(true);
         break;
 
       case "get":

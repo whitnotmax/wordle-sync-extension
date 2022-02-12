@@ -10,10 +10,8 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.powerlanguage.co.uk/wordle/"],
-      "all_frames" : true,
-      "exclude_matches": [ ],
-      "run_at": "document_start",
+      "matches": ["https://www.nytimes.com/games/wordle/index.html"],
+      
       "js": ["build/injection.js"]
     }
   ],
