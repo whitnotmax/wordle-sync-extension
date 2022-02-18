@@ -1,17 +1,17 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Wordle Sync",
   "permissions": ["storage", "tabs", "alarms"],
   "background": {
-    "service_worker": "build/background.js"
+    "scripts": ["build/background.js"],
+    "persistent": true
   },
-  "action": {
+  "browser_action": {
     "default_popup": "index.html"
   },
   "content_scripts": [
     {
       "matches": ["https://www.nytimes.com/games/wordle/index.html"],
-      
       "js": ["build/injection.js"]
     }
   ],
@@ -19,5 +19,5 @@
     "16": "wordle16.png",
     "48": "wordle48.png",
    "128": "wordle128.png" },
-   "version": "1.0"
+   "version": "1.1"
 }
