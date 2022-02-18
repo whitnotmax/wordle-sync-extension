@@ -30,50 +30,33 @@ chrome.runtime.onMessage.addListener(
         break;
       
       case "user":
-        chrome.alarms.create({ delayInMinutes: 0.00166667 }); // 0.1 seconds
-        function handleUserAlarm() { 
-          console.log('handle alarm');
-          chrome.runtime.sendMessage({reason: "hasuser", "user": auth.currentUser}, function(response){});
-          // do this, otherwise a new listener gets added every time the page reloads and we send the data multiple times
-          chrome.alarms.onAlarm.removeListener(handleUserAlarm);
-        }
-        chrome.alarms.onAlarm.addListener(handleUserAlarm);
-        sendResponse(true);
+        console.log(auth.currentUser)
+        sendResponse({content: auth.currentUser});
         break;
 
       case "get":
-        console.log('get called');
-        chrome.alarms.create({ delayInMinutes: 0.00333333 }); // 0.2 seconds
-        function handleAlarm() { 
-          if (auth.currentUser) {
-            console.log("get data");
-            const docRef = doc(db, "users", auth.currentUser.uid);
-            getDoc(docRef)
-            .then((docSnap) => {
-              if (docSnap.exists()) {
-                console.log("data is: " + docSnap.data().data);
-                chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                  chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": docSnap.data().data}, function(response) {});
-  
-                });
-              } else {
-                chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                  chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": ""}, function(response) {});
-                });
-              }
-            }) 
+        if (auth.currentUser) {
+          console.log("get data");
+          const docRef = doc(db, "users", auth.currentUser.uid);
+          getDoc(docRef)
+          .then((docSnap) => {
+            if (docSnap.exists()) {
+              console.log("data is: " + docSnap.data().data);
+              chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": docSnap.data().data}, function(response) {});
+
+              });
             } else {
               chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": "unauthenticated"}, function(response) {});
+                chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": ""}, function(response) {});
               });
-          }
-          // do this, otherwise a new listener gets added every time the page reloads and we send the data multiple times
-          chrome.alarms.onAlarm.removeListener(handleAlarm);
+            }
+          }) 
+          } else {
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+              chrome.tabs.sendMessage(tabs[0].id, {"reason": "data", "data": "unauthenticated"}, function(response) {});
+            });
         }
-        chrome.alarms.onAlarm.addListener(handleAlarm);
-
-        
-
 
         sendResponse({value: true});
         break;
@@ -88,7 +71,7 @@ chrome.runtime.onMessage.addListener(
           });
         }
 
-        sendResponse(true);
+        sendMessage(true);
         break;
 
       case "create":
@@ -128,11 +111,9 @@ chrome.runtime.onMessage.addListener(
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
           chrome.tabs.sendMessage(tabs[0].id, {"reason": "reload"}, function(response) {});
         });
-        sendResponse(true);
         break;
 
       default:
-        sendResponse(true);
         break;
     }
   }); 

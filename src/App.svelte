@@ -19,6 +19,7 @@ import { onMount } from "svelte";
 	async function getUser() {
 		console.log("get user");
 		chrome.runtime.sendMessage({reason: "user"}, function(response) {
+			user = response.content;
 	});
 	}
 	onMount((async() =>  getUser()));
