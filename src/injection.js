@@ -11,7 +11,7 @@ chrome.runtime.onMessage.addListener(
           notification.innerText = "You are not signed in to Wordle Sync extension! Your stats may be unavailable or inaccurate until you sign in."
         } else {
           if (request.data !== "") {
-            localStorage.statistics = request.data;
+            localStorage['nyt-wordle-statistics'] = JSON.stringify(JSON.parse(request.data));
             notification.remove();
           } else {
             console.log("Not updating with blank data!");
@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener(
         break;
         
       case "needscores":
-        chrome.runtime.sendMessage({reason: "set", data: localStorage.statistics}, function(response){});
+        chrome.runtime.sendMessage({reason: "set", data: localStorage['nyt-wordle-statistics']}, function(response){});
         sendResponse(true);
         break;
       
