@@ -65,10 +65,13 @@ chrome.runtime.onMessage.addListener(
         if (auth.currentUser) {
           console.log(request.data);
           const docRef = doc(db, "users", auth.currentUser.uid);
-          setDoc(docRef, {data: request.data});
-          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {"reason": "reload"}, function(response) {});
-          });
+          setDoc(docRef, {data: request.data})
+            .then(() => {
+              chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, {"reason": "reload"}, function(response) {});
+              });
+            });
+          
         }
 
         sendMessage(true);
